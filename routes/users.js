@@ -1,12 +1,21 @@
 const bcrypt = require('bcrypt');
+const mongoose = require ('mongoose');
+const User = require('../models/users');
 
 const {
   requireAuth,
   requireAdmin,
+  isAdmin,
 } = require('../middleware/auth');
 
 const {
   getUsers,
+  getUsersJSON,
+  getUserByID,
+  getUserByEmail,
+  saveUser,
+  putUser,
+  deleteUser
 } = require('../controller/users');
 
 const initAdminUser = (app, next) => {
@@ -18,8 +27,28 @@ const initAdminUser = (app, next) => {
   const adminUser = {
     email: adminEmail,
     password: bcrypt.hashSync(adminPassword, 10),
-    roles: { admin: true },
+    role: 'admin',
   };
+
+  getUsers()
+  .then(users => {
+    // console.log('Todas las personas:', users);
+    const existsUser = users.some(user =>user.email === adminUser.email);
+    if (!existsUser){
+      const newAdminUserDB = new User(adminUser);
+      return newAdminUserDB.save();
+    } else {
+    console.error(`El usuario ${adminUser.email} ya existe en la base de datos`)
+    }
+  })
+  .catch(error => {
+    // Maneja el error si ocurrió durante la búsqueda
+    console.error('Error general:', error);
+  })
+  // .finally(() => {
+    // Cierra la conexión a la base de datos después de la consulta
+    // mongoose.connection.close();
+  // });
 
   // TODO: Create admin user
   // First, check if adminUser already exists in the database
@@ -27,6 +56,8 @@ const initAdminUser = (app, next) => {
 
   next();
 };
+
+// mongoose.connect('mongodb://127.0.0.1:27017/burger-queen-api');
 
 /*
  * Español:
@@ -84,20 +115,118 @@ const initAdminUser = (app, next) => {
  */
 
 module.exports = (app, next) => {
-
-  app.get('/users', requireAdmin, getUsers);
-
-  app.get('/users/:uid', requireAuth, (req, resp) => {
+  app.use('/user/:test', function(req, res, next) {
+    console.log('Test-Request URL:', req.originalUrl);
+    next();
+  }, function (req, res, next) {
+    console.log('Test-Request Type:', req.method);
+    next();
   });
 
-  app.post('/users', requireAdmin, (req, resp, next) => {
+  app.get('/users', requireAdmin, async(req, resp) => {
+  try {
+    let allUsers = await getUsersJSON();
+    resp.json(allUsers)
+  } catch(error) {
+    resp.status(403).json({"error": "No tiene permiso de Administradora"});
+  }
+    /* next() */
+  });
+
+  app.get('/users/:uid', requireAuth, async(req, resp, next) => {
+    const uidUser = req.params.uid; 
+    console.log('r/u get/:uid:',uidUser !== req.iud,!isAdmin(req));
+    if (uidUser !== req.uid && !isAdmin(req)){
+      resp.status(403).json({"error": "No tiene permiso de Administradora"});
+    } else{
+      try {
+        let user = await getUserByID(uidUser);
+        console.log('r/u get/:uid user:',user);
+        if (user){
+          resp.json(user);
+        }
+      } catch(error) {
+        resp.status(404).json({"error": "La usuaria solicitada no existe"});
+      }
+    }
+    
+  });
+
+  app.post('/users', requireAdmin, async(req, resp, next) => {
     // TODO: Implement the route to add new users
+    const newUser = req.body; // Acceder a los datos en el cuerpo de la solicitud
+    // console.log('r/u post req.body: ',newUser);
+    if (!newUser.email || !newUser.password || !newUser.role) {
+      resp.status(400).json({"error": "Falta información"});
+    }
+  
+    const newUserCrypted = {
+      email: newUser.email,
+      password: bcrypt.hashSync(newUser.password, 10),
+      role: newUser.role,
+    };
+  
+    try {
+      let user = await getUserByEmail(newUser.email);
+      console.log('r/u post/ user registrado:',user);
+      if ( user === null){
+        const savedUser = await saveUser(newUserCrypted)
+        resp.json(savedUser);
+      } else {
+        resp.status(403).json({"error": "Email ya registrado"});
+      }
+    }catch (error){
+      resp.status(500).json({"error": 'Error interno del servidor, no se pudo guardar el usuario'})
+    }    
   });
 
-  app.put('/users/:uid', requireAuth, (req, resp, next) => {
+  app.put('/users/:uid', requireAuth, async (req, resp, next) => {
+    const newUserData = req.body; // Acceder a los datos en el cuerpo de la 
+    newUserData.password = bcrypt.hashSync(newUserData.password, 10),
+    console.log('r/u put newUserData:', newUserData);
+    const userIdentifier = req.params.uid;
+    console.log('r/u put userIdentifier:', userIdentifier);
+
+    const userReq = await getUserByID(req.uid);
+    console.log('r/u put userReq:', userReq);
+    const userAutoPut = userIdentifier === userReq.email || userIdentifier === userReq.id;
+    if ( !isAdmin(req) && !userAutoPut ){
+      resp.status(403).json({"error": 'No cuenta con permisos de Administradorxxx'})
+    }else if (userAutoPut && newUserData.role !== userReq.role){
+      resp.status(403).json({"error": 'No puede modificar su role'})
+    } else {
+      try{
+        const updatedUser = await putUser(userIdentifier, newUserData, req);
+        console.log('r/u put updatedUser: ',updatedUser);
+        if (updatedUser === null){
+          resp.status(404).json({"error": 'Error la usuaria solicitada no existe(3)'})
+        }
+        resp.json(updatedUser)
+      }catch(error){
+        resp.status(500).json({"error": 'Error interno del servidor, no se pudo actualizar la información'})
+      }
+    }
   });
 
-  app.delete('/users/:uid', requireAuth, (req, resp, next) => {
+  app.delete('/users/:uid', requireAuth, async(req, resp, next) => {
+    const userIdentifier = req.params.uid;
+    const userReq = await getUserByID(req.uid);
+    const userAutoDelete = userIdentifier === userReq.email || userIdentifier === userReq.id;
+    if ( !isAdmin(req) && !userAutoDelete ){
+      resp.status(403).json({"error": 'No cuenta con permisos de Administradora'})
+    }else {
+      try{
+        const deletedUser = await deleteUser(userIdentifier);
+        console.log('r/u delete deletedUser: ',deletedUser);
+        if (deletedUser === null){
+          resp.status(404).json({"error": 'Error la usuaria solicitada no existe(4)'})
+        } else {
+          resp.json(deletedUser)
+        }
+      }catch(error){
+        resp.status(500).json({"error": 'Error interno del servidor, no se pudo actualizar la información'})
+      }
+    }
   });
 
   initAdminUser(app, next);
