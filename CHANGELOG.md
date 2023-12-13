@@ -1,3 +1,24 @@
+## 1.2.0 - 2023-12-13
+
+### Sprint learnings
+
+- Mejor uso de Postman
+- Mejos uso de promesas
+
+### Added
+
+- CRUD de Ordenes
+- CRUD de Productos
+
+### Changed
+
+- Se cambió el Schema de productos y ordenes para no tener dependencias a otros schemas
+
+### Fixed
+
+- Se corrigió la autenticación en caso de no enviar los datos correctos, no queda esperando la promesa
+
+
 ## 1.1.1 - 2023-12-06
 
 ### Sprint learnings
