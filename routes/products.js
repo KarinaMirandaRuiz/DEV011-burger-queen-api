@@ -41,9 +41,9 @@ module.exports = (app, nextMain) => {
   app.post('/products', requireAdmin, async(req, resp, next) => {
     try {
       const newProductData = req.body;
-      console.log('r/p newProductData.userId: ', newProductData.userId); // change id to ObjetID
-      console.log('r/p newProductData.products: ', newProductData.products); // change id to ObjetID
-      console.log('r/p newProductData: ', newProductData.status); // change id to ObjetID
+      console.log('r/p newProductData.name: ', newProductData.name); // change id to ObjetID
+      console.log('r/p newProductData.price: ', newProductData.price); // change id to ObjetID
+      console.log('r/p newProductData: ', newProductData); // change id to ObjetID
       if (!newProductData.name) {
         resp
           .status(400)
@@ -93,8 +93,10 @@ module.exports = (app, nextMain) => {
     try {
       const deletedProduct = await deleteProduct(productId);
       console.log('r/p delete deletedProduct: ', deletedProduct);
-      if (deletedProduct === null) {
+      if (deletedProduct === undefined) {
         resp.status(404).json({ 'error': 'Error el producto solicitado no existe(4)'});
+      } else if (deleteProduct === null) {
+        resp.status(500).json({'error':'No se pudo actualizar la información'});
       } else {
         resp.json(deletedProduct);
       }

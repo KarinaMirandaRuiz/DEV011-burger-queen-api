@@ -7,7 +7,7 @@ module.exports = {
       // console.log('Ordenes de la collección: ',allOrders);
       return allOrders;
     } catch(error){
-      console.error('Error al buscar todas las ordenes:', error);
+      // console.log('Error al buscar todas las ordenes:', error);
       throw error;
     }
   },
@@ -18,7 +18,7 @@ module.exports = {
       console.log('c/o getOrderByID Orden en la collección: ', orderByID);
       return orderByID;
     } catch(error){
-      console.error('Error al buscar orden por ID: ', error);
+      console.log('Error al buscar orden por ID: ', error);
       throw error;
     }
   },
@@ -57,10 +57,10 @@ module.exports = {
         console.log('c/o deleteOrder orderDeleted: ', orderDeleted);
         return (!orderDeleted ? orderToDelete: 'Error al borrar la orden')
       }else{
-        return null;
+        return undefined;
       }
     }catch(error){
-      throw error;
+      throw new Error(`No se pudo borrar la orden con ID: ${idOrderToDelete}`);
     }
   }
 }
