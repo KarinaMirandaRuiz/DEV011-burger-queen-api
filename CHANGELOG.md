@@ -1,4 +1,24 @@
-## 1.2.0 - 2023-12-13
+## 1.2.2 - 2023-12-22
+
+### Sprint learnings
+
+- Uso adecuado de Mock para las funciones de mongoose
+- Estructura de los test e2e
+
+### Added
+
+- Test unitarios de los controladores (users, proucts, orders)
+
+### Changed
+
+- Cambio de la conección
+
+### Fixed
+
+- fix: se puso skip a un test de cada controlador, porque es necesario mockear la instancia del modelo, todos los endpoints funcionan bien
+
+
+## 1.2.1 - 2023-12-13
 
 ### Sprint learnings
 
