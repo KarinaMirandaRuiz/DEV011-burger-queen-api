@@ -15,8 +15,12 @@ module.exports = (app, nextMain) => {
 
   app.get('/products', requireAuth, async (req, resp, next) => {
     try {
-      const allProducts = await getProducts();
-      resp.json(allProducts);
+      const limit = req.query.limit || 10;
+      const page = req.query.page || 1;
+      const allProducts = await getProducts(page,limit);
+      
+      resp.set('Link', allProducts.linkHeader);
+      resp.json(allProducts.respProductsGet);
     } catch (error) {
       resp.status(500).json({ 'error': error });
     }
@@ -66,13 +70,13 @@ module.exports = (app, nextMain) => {
     }
   });
 
-  app.put("/products/:productId", requireAdmin, async (req, resp, next) => {
+  app.patch("/products/:productId", requireAdmin, async (req, resp, next) => {
     const newProductToUpdate = req.body;
-    // console.log('r/p put newProductToUpdate: ', newProductToUpdate);
+    // console.log('r/p patch newProductToUpdate: ', newProductToUpdate);
     const idProductToUpdate = req.params.productId;
-    // console.log('r/p put idProductToUpdate: ', idProductToUpdate);
+    // console.log('r/p patch idProductToUpdate: ', idProductToUpdate);
     const productToUpdate = await getProductByID(idProductToUpdate);
-    // console.log('r/p put productToUpdate: ', productToUpdate);
+    // console.log('r/p patch productToUpdate: ', productToUpdate);
     if (Object.keys(newProductToUpdate).length === 0 || (newProductToUpdate.price && isNaN(Number(newProductToUpdate.price)))) {
       resp.status(400).json({ error: "No se indican ninguna propiedad a modificar" });
     } else if (productToUpdate === null) {
@@ -83,7 +87,7 @@ module.exports = (app, nextMain) => {
         resp.status(200).json(productUpdated);
 
       } catch (error) {
-        // Temp coment console.log('r/p putProduct error: ', error);
+        // Temp coment console.log('r/p patchProduct error: ', error);
         resp.status(555).json(error);
       }
     }

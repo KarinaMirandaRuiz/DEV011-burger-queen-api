@@ -35,6 +35,8 @@ describe('GET /users', () => {
         expect(Array.isArray(json)).toBe(true);
         expect(json.length > 0).toBe(true);
         // TODO: Check that the results are actually the "expected" user objects
+        // expect(json[0].email).toBe('superadmin@localhost');
+        // expect(json[1].email).toBe('test@test.test');    
       })
   ));
 
@@ -206,33 +208,33 @@ describe('POST /users', () => {
   ));
 });
 
-describe('PUT /users/:uid', () => {
+describe('PATCH /users/:uid', () => {
   it('should fail with 401 when no auth', () => (
-    fetch('/users/foo@bar.baz', { method: 'PUT' })
+    fetch('/users/foo@bar.baz', { method: 'PATCH' })
       .then((resp) => expect(resp.status).toBe(401))
   ));
 
   it('should fail with 403 when not owner nor admin', () => (
     fetchAsTestUser(`/users/${config.adminEmail}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: { email: config.adminEmail, password: '123456', role:'admin'}
     })
       .then((resp) => expect(resp.status).toBe(403))
   ));
 
   it('should fail with 404 when admin and not found', () => (
-    fetchAsAdmin('/users/abc@def.gih', { method: 'PUT' })
+    fetchAsAdmin('/users/abc@def.gih', { method: 'PATCH' })
       .then((resp) => expect(resp.status).toBe(404))
   ));
 
   it('should fail with 400 when no props to update', () => (
-    fetchAsTestUser('/users/test@test.test', { method: 'PUT' })
+    fetchAsTestUser('/users/test@test.test', { method: 'PATCH' })
       .then((resp) => expect(resp.status).toBe(400))
   ));
 
   it('should fail with 403 when not admin tries to change own roles', () => (
     fetchAsTestUser('/users/test@test.test', {
-      method: 'PUT',
+      method: 'PATCH',
       body: { email: 'test@test.test', password: '123456', role:'admin'},
     })
       .then((resp) => expect(resp.status).toBe(403))
@@ -241,7 +243,7 @@ describe('PUT /users/:uid', () => {
     //corregir
   it('should update user when own data (password change)', () => (
     fetchAsTestUser('/users/test@test.test', {
-      method: 'PUT',
+      method: 'PATCH',
       body: {
         "email": "test@test.test",
         "password": "garmadon",
@@ -262,7 +264,7 @@ describe('PUT /users/:uid', () => {
 
   it('should update user when admin', () => (
     fetchAsAdmin('/users/test@test.test', {
-      method: 'PUT',
+      method: 'PATCH',
       body: {
         "email": "test@test.test",
         "password": "ohmygod",

@@ -17,6 +17,7 @@ const register = (app, routes, cb) => {
   }
 
   routes[0](app, (err) => {
+    console.log('index err:', err);
     if (err) {
       return cb(err);
     }

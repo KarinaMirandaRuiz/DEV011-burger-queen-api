@@ -68,7 +68,7 @@ module.exports = (app, nextMain) => {
             .catch((err) => {
               //console.log("r/a-err: ", err);
               return next({
-                status: 555,
+                status: 404,
                 message: "No hay conincidencia en las credenciales",
               });
             });
