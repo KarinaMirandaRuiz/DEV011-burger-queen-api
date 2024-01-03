@@ -11,6 +11,7 @@
   * [3.4 Orders](#orders)
 
 ## Resumen del Proyecto
+
 Este proyecto consiste en desarrollar un servidor web para un restaurante de hamburguesas que desea gestionar pedidos a través de una tablet. El servidor, implementado en Node.js con Express, ofrece una API REST que permite realizar operaciones relacionadas con usuarios, productos y ordenes.
 
 ## Instalación y Ejecución
@@ -18,6 +19,7 @@ Este proyecto consiste en desarrollar un servidor web para un restaurante de ham
 2. Instala las dependencias con ``npm install``.
 3. Configura las variables de entorno en un archivo ``.env``.
 4. Ejecuta el servidor con ``npm start``.
+
 
 ## Endpoints
 
@@ -300,3 +302,4 @@ Este proyecto consiste en desarrollar un servidor web para un restaurante de ham
     - 200: Operación exitosa
     - 401: Si no hay encabezado de autenticación
     - 404: Si el pedido con el ``orderId`` indicado no existe
+
