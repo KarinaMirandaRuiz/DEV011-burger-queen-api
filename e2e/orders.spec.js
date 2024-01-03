@@ -268,15 +268,15 @@ describe('GET /orders/:orderId', () => {
   ));
 });
 
-describe('PUT /orders/:orderId', () => {
+describe('PATCH /orders/:orderId', () => {
   it('should fail with 401 when no auth', () => (
-    fetch('/orders/xxx', { method: 'PUT' })
+    fetch('/orders/xxx', { method: 'PATCH' })
       .then((resp) => expect(resp.status).toBe(401))
   ));
 
   it('should fail with 404 when not found', () => (
     fetchAsAdmin('/orders/xxx', {
-      method: 'PUT',
+      method: 'PATCH',
       body: { state: 'canceled' },
     })
       .then((resp) => expect(resp.status).toBe(404))
@@ -305,7 +305,7 @@ describe('PUT /orders/:orderId', () => {
       })
       .then((json) => fetchAsTestUser(`/orders/${json._id}`))
       .then((resp) => resp.json())
-      .then((json) => fetchAsAdmin(`/orders/${json._id}`, { method: 'PUT' }))
+      .then((json) => fetchAsAdmin(`/orders/${json._id}`, { method: 'PATCH' }))
       .then((resp) => expect(resp.status).toBe(400))
   ));
 
@@ -331,7 +331,7 @@ describe('PUT /orders/:orderId', () => {
         return resp.json();
       })
       .then((json) => fetchAsAdmin(`/orders/${json._id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         body: { status: 'oh yeah!' },
       }))
       .then((resp) => expect(resp.status).toBe(400))
@@ -361,7 +361,7 @@ describe('PUT /orders/:orderId', () => {
       .then((json) => {
         expect(json.status).toBe('pending');
         return fetchAsAdmin(`/orders/${json._id}`, {
-          method: 'PUT',
+          method: 'PATCH',
           body: { status: 'canceled' },
         });
       })
@@ -396,7 +396,7 @@ describe('PUT /orders/:orderId', () => {
       .then((json) => {
         expect(json.status).toBe('pending');
         return fetchAsAdmin(`/orders/${json._id}`, {
-          method: 'PUT',
+          method: 'PATCH',
           body: { status: 'delivering' },
         });
       })
@@ -431,7 +431,7 @@ describe('PUT /orders/:orderId', () => {
       .then((json) => {
         expect(json.status).toBe('pending');
         return fetchAsAdmin(`/orders/${json._id}`, {
-          method: 'PUT',
+          method: 'PATCH',
           body: { status: 'delivered' },
         });
       })

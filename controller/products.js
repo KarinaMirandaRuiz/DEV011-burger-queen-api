@@ -1,11 +1,21 @@
 const Product = require('../models/products');
 
 module.exports = {
-  getProducts: async() => {
+  getProducts: async(page,limit) => {
     try {
-      const allProducts = await Product.find();
-      // console.log('Productos de la collección: ',allOrders);
-      return allProducts;
+      const respProductsGet = await Product.find().limit(limit).skip((page - 1) * limit);
+
+      const baseUrl = '/products';
+      const count = await Product.countDocuments();
+      const totalPages = Math.ceil(count / limit);
+      const linkHeader = [
+        `<${baseUrl}?page=1&limit=${limit}>; rel="first"`,
+        page > 1 ? `<${baseUrl}?page=${page - 1}&limit=${limit}; rel="prev"` : `<${baseUrl}?page=${page}&limit=${limit}>; rel="prev"`,
+        page < totalPages ? `<${baseUrl}?page=${page - -1}&limit=${limit}>; rel="next"`:`<${baseUrl}?page=${page}&limit=${limit}>; rel="next"`,
+        `<${baseUrl}?page=${totalPages}&limit=${limit}>; rel="last"`,
+      ].join(', ');
+
+      return {respProductsGet,linkHeader};
     } catch(error){
       // console.log('c/p Error al buscar todos los productos:', error);
       throw new Error('No se pudo consultar la información de los productos');

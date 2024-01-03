@@ -14,7 +14,7 @@ const {
   getUserByID,
   getUserByEmail,
   saveUser,
-  putUser,
+  patchUser,
   deleteUser
 } = require('../controller/users');
 
@@ -127,7 +127,8 @@ module.exports = (app, next) => {
     try {
       const limit = req.query.limit || 10;
       const page = req.query.page || 1;
-      let allUsers = await getUsersJSON(page,limit);
+      const allUsers = await getUsersJSON(page,limit);
+      //console.log('r/u get/:',allUsers);
     
       resp.set('Link', allUsers.linkHeader);
       resp.json(allUsers.respUsersGet)
@@ -143,7 +144,7 @@ module.exports = (app, next) => {
     
     try {
       const user = (uidUser.includes('@'))? await getUserByEmail(uidUser) : await getUserByID(uidUser);
-      console.log('r/u get/:uid user:',user);
+      // console.log('r/u get/:uid user:',user);
       if (user.id.toString() !== req.uid && !isAdmin(req)){
         resp.status(403).json({"error": "No tiene permiso de Administradora"});
       } else if (user){
@@ -155,7 +156,7 @@ module.exports = (app, next) => {
     
   });
 
-  app.post('/users', requireAdmin, async(req, resp, next) => {
+  app.post('/users', requireAuth, async(req, resp, next) => {
     // TODO: Implement the route to add new users
     const newUser = req.body; // Acceder a los datos en el cuerpo de la solicitud
     // console.log('r/u post req.body: ',newUser);
@@ -185,19 +186,19 @@ module.exports = (app, next) => {
   
   });
 
-  app.put('/users/:uid', requireAuth, async (req, resp, next) => {
+  app.patch('/users/:uid', requireAuth, async (req, resp, next) => {
     const userIdentifier = req.params.uid;
-    console.log('r/u put userIdentifier:', userIdentifier);
+    console.log('r/u patch userIdentifier:', userIdentifier);
     const newUserData = req.body; // Acceder a los datos en el cuerpo de la solicitud
-    console.log('r/u put newUserData(1): ',newUserData);
+    console.log('r/u patch newUserData(1): ',newUserData);
     // const userReq = await getUserByID(req.uid);
     const userReq = (userIdentifier.includes('@'))? await getUserByEmail(userIdentifier) : await getUserByID(userIdentifier);
     if (userReq === null){
       resp.status(404).json({"error": 'Error la usuaria solicitada no existe(3)'})
     }else {
-      console.log('r/u put userReq:', userReq);
+      console.log('r/u patch userReq:', userReq);
       const userAutoPut = req.uid === userReq.email || req.uid === userReq.id;
-      console.log('r/u put userAutoPut:', userAutoPut);
+      console.log('r/u patch userAutoPut:', userAutoPut);
       if ( !isAdmin(req) && !userAutoPut ){
         resp.status(403).json({"error": 'No cuenta con permisos de Administradorxxx'})
       }else if (!newUserData ||(!newUserData.email || !newUserData.password || !newUserData.role)) {
@@ -206,10 +207,10 @@ module.exports = (app, next) => {
         resp.status(403).json({"error": 'No puede modificar su role'})
       } else {
         try{
-          console.log('r/u put newUserData:', newUserData);
+          console.log('r/u patch newUserData:', newUserData);
           newUserData.password = bcrypt.hashSync(newUserData.password, 10);
-          const updatedUser = await putUser(userIdentifier, newUserData, req);
-          console.log('r/u put updatedUser: ',updatedUser);
+          const updatedUser = await patchUser(userIdentifier, newUserData, req);
+          console.log('r/u patch updatedUser: ',updatedUser);
 
           resp.json(updatedUser)
           

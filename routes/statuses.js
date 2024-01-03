@@ -24,7 +24,7 @@ module.exports = (app, nextMain) => {
   app.post('/statuses', requireAuth, (req, resp, next) => {
   });
 
-  app.put('/statuses/:statusesId', requireAuth, (req, resp, next) => {
+  app.patch('/statuses/:statusesId', requireAuth, (req, resp, next) => {
   });
 
   app.delete('/statuses/:statusesId', requireAuth, (req, resp, next) => {

@@ -1,11 +1,21 @@
 const Order = require('../models/orders');
 
 module.exports = {
-  getOrders: async() => {
+  getOrders: async(page,limit) => {
     try {
-      const allOrders = await Order.find();
-      // console.log('Ordenes de la collección: ',allOrders);
-      return allOrders;
+      const respOrdersGet = await Order.find().limit(limit).skip((page - 1) * limit);
+
+      const baseUrl = '/orders';
+      const count = await Order.countDocuments();
+      const totalPages = Math.ceil(count / limit);
+      const linkHeader = [
+        `<${baseUrl}?page=1&limit=${limit}>; rel="first"`,
+        page > 1 ? `<${baseUrl}?page=${page - 1}&limit=${limit}; rel="prev"` : `<${baseUrl}?page=${page}&limit=${limit}>; rel="prev"`,
+        page < totalPages ? `<${baseUrl}?page=${page - -1}&limit=${limit}>; rel="next"`:`<${baseUrl}?page=${page}&limit=${limit}>; rel="next"`,
+        `<${baseUrl}?page=${totalPages}&limit=${limit}>; rel="last"`,
+      ].join(', ');
+
+      return {respOrdersGet,linkHeader};
     } catch(error){
       // console.log('Error al buscar todas las ordenes:', error);
       throw error;

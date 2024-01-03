@@ -13,8 +13,12 @@ const {
 module.exports = (app, nextMain) => {
   app.get('/orders', requireAuth, async (req, resp, next) => {
     try {
-      const allOrders = await getOrders();
-      resp.json(allOrders);
+      const limit = req.query.limit || 10;
+      const page = req.query.page || 1;
+      const allOrders = await getOrders(page,limit);
+      
+      resp.set('Link', allOrders.linkHeader);
+      resp.json(allOrders.respOrdersGet);
     } catch (error) {
       resp.status(500).json({ 'error': error });
     }
@@ -63,11 +67,11 @@ module.exports = (app, nextMain) => {
     }
   });
 
-  app.put('/orders/:orderId', requireAuth, async (req, resp, next) => {
+  app.patch('/orders/:orderId', requireAuth, async (req, resp, next) => {
     const idOrderToUpdate = req.params.orderId;
 
     const orderByID = await getOrderByID(idOrderToUpdate);
-    //console.log('r/o put orderByID: ', orderByID);
+    //console.log('r/o patch orderByID: ', orderByID);
 
     const newOrderToUpdate = req.body;
     const statuses = ['pending', 'canceled', 'delivering', 'delivered']
@@ -88,7 +92,7 @@ module.exports = (app, nextMain) => {
         }
       }
     } catch (error) {
-      // Temp coment console.log('r/o putOrder error: ', error);
+      // Temp coment console.log('r/o patchOrder error: ', error);
       resp.status(555).json(error);
     }
   });

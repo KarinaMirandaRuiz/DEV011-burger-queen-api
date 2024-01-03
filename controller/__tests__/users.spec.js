@@ -4,7 +4,7 @@ const {
   getUserByID,
   getUserByEmail,
   saveUser,
-  putUser,
+  patchUser,
   deleteUser
 } = require('../users');
 
@@ -160,7 +160,7 @@ describe.skip('saveUser', () => {
   });
 });
 
-describe('putUser', () => {
+describe('patchUser', () => {
   it('Debe mandar un documento actualizado de la colección de usuarios (id)', async () => {
     User.findById.mockReset()
     User.findOneAndUpdate.mockReset()
@@ -168,7 +168,7 @@ describe('putUser', () => {
     User.findById.mockResolvedValue(mockUserWithId)
     User.findOneAndUpdate.mockImplementationOnce(() => Promise.resolve());;
 
-    await expect(putUser('321654',mockUser)).resolves.toEqual(mockUserJson)
+    await expect(patchUser('321654',mockUser)).resolves.toEqual(mockUserJson)
     expect(User.findById).toHaveBeenCalled();
     expect(User.findOneAndUpdate).toHaveBeenCalled();
   });
@@ -180,7 +180,7 @@ describe('putUser', () => {
     User.find.mockResolvedValue([mockUserWithId])
     User.findOneAndUpdate.mockImplementationOnce(() => Promise.resolve());;
 
-    await expect(putUser('otro@user',mockUser)).resolves.toEqual(mockUserJson)
+    await expect(patchUser('otro@user',mockUser)).resolves.toEqual(mockUserJson)
     expect(User.find).toHaveBeenCalled();
     expect(User.findOneAndUpdate).toHaveBeenCalled();
   });
@@ -189,7 +189,7 @@ describe('putUser', () => {
     User.findById.mockReset()
     User.findById.mockResolvedValueOnce(null)
 
-    await expect(putUser('321654',mockUser)).resolves.toEqual(undefined)
+    await expect(patchUser('321654',mockUser)).resolves.toEqual(undefined)
     expect(User.findById).toHaveBeenCalled();
   });
 
@@ -200,7 +200,7 @@ describe('putUser', () => {
     User.findById.mockResolvedValue(mockUserWithId)
     User.findOneAndUpdate.mockImplementationOnce(() => Promise.reject());
     
-    await expect(putUser('123456',mockUser)).rejects.toThrow('Error al intentar actualizar la información del usuario: 123456');
+    await expect(patchUser('123456',mockUser)).rejects.toThrow('Error al intentar actualizar la información del usuario: 123456');
     expect(User.findById).toHaveBeenCalled();
     expect(User.findOneAndUpdate).toHaveBeenCalled();
   });
