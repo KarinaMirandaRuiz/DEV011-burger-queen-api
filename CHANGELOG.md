@@ -1,3 +1,25 @@
+## 2.0.0 - 2023-01-03
+
+### Sprint learnings
+
+- Despliegue en Atlas y agregar IP Access
+- Configuración .env
+  
+### Added
+
+- Paginación de products y orders,  y  (Karina_mr) 2024-01-02
+- Configuración .env
+
+### Changed
+
+- Cambio del readme
+- pasan todos los test e2e
+
+### Fixed
+
+- Ajuste de put por patch
+- Ajuste de tests unitarios
+
 ## 1.2.2 - 2023-12-22
 
 ### Sprint learnings
